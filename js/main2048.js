@@ -112,6 +112,8 @@ function generateOneNumber() {
 				var randY = parseInt(Math.floor(Math.random()*4) );
 			}
 		}
+
+
 		//随机一个数字
 		var randNumber = Math.random() < 0.5 ? 2 : 4; 
 		
@@ -251,7 +253,7 @@ function moveDown() {
 							score += board[k][j];
 							updateScore(score);
 							
-							hasConficted[k][j] = false;
+							hasConficted[k][j] = true;
 							continue;
 						}
 					}
@@ -284,7 +286,7 @@ function moveUp() {
 							score += board[k][j];
 							updateScore(score);
 							
-							hasConficted[k][j] = false;
+							hasConficted[k][j] = true;
 							continue;
 						}
 					}
@@ -298,6 +300,6 @@ function moveUp() {
 
 function isGameover() {
 	if (noSpace(board) && noMove(board)) {
-		alert(over);
+		alert('LOL! GAME OVER SILLY BOY!');
 	}
 }
