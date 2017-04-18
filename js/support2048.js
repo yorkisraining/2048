@@ -1,9 +1,15 @@
+var documentWidth = window.screen.availWidth, //屏幕大小
+	gridContainWidth = 0.92 * documentWidth, // 大框尺寸
+	cellTop = 0.22 * documentWidth, // 小框顶点
+	cellSideLength = 0.18 * documentWidth,  // 小框边长
+	cellSpace = 0.04 * documentWidth; // 小框间隔
+
 function getPosTop(i, j) {
-	return 20 + i*120;
+	return cellSpace + i*(cellSideLength+cellSpace);
 }
 
 function getPosLeft(i, j) {
-	return 20 + j*120;
+	return cellSpace + j*(cellSideLength+cellSpace);
 }
 
 function getNumberBackground( number) {

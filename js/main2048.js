@@ -2,13 +2,52 @@ var board = new Array();
 var score = 0;
 var hasConficted = new Array();
 
+var startX = 0,
+	startY = 0,
+	endX = 0,
+	endY = 0
+
 window.onload = function() {
+	prepareMobile();
 	newgame();
+}
+
+function prepareMobile() {
+	
+	if (documentWidth > 500) {
+		gridContainWidth = 500, // 大框尺寸
+		cellTop = 120, // 小框顶点
+		cellSideLength = 100,  // 小框边长
+		cellSpace = 20; // 小框间隔
+	}
+	
+	var canvas = document.getElementById('canvas');
+	canvas.height = gridContainWidth - 2 * cellSpace;
+	canvas.width = gridContainWidth - 2 * cellSpace;
+	
+	var context = canvas.getContext('2d');
+	
+	
+	
+	$('#grid-container').css({
+		'width': gridContainWidth - 2 * cellSpace,
+		'height': gridContainWidth - 2 * cellSpace,
+		'padding': cellSpace,
+		'borderRadius': 0.02 * gridContainWidth
+	});
+	
+	for ( var i=0; i<4; i++) {
+		for ( var j=0; j<4; j++) {
+			drawrec(context, i * cellTop , j * cellTop, cellSideLength, cellSideLength, 0.02*cellSideLength, '#ccc0b3');
+		}
+	}
+	
+	
 }
 
 function newgame() {
 	//画出棋盘
-	draw();
+	//draw();
 	//初始化棋盘格
 	init();
 	//随机在两个格子里放数字
@@ -16,19 +55,19 @@ function newgame() {
 	generateOneNumber();
 }
 
-function draw() {
-	var canvas = document.getElementById('canvas');
-	canvas.height = 460;
-	canvas.width = 460;
-	
-	var context = canvas.getContext('2d');
-	
-	for ( var i=0; i<4; i++) {
-		for ( var j=0; j<4; j++) {
-			drawrec(context, i * 120, j * 120, 100, 100, 6, '#ccc0b3');
-		}
-	}
-}
+//function draw() {
+//	var canvas = document.getElementById('canvas');
+//	canvas.height = 460;
+//	canvas.width = 460;
+//	
+//	var context = canvas.getContext('2d');
+//	
+//	for ( var i=0; i<4; i++) {
+//		for ( var j=0; j<4; j++) {
+//			drawrec(context, i * 120, j * 120, 100, 100, 6, '#ccc0b3');
+//		}
+//	}
+//}
 
 function drawrec(cxt, x, y, width, height, radius, color) {
 	cxt.save();
@@ -78,22 +117,30 @@ function updateBoardView(){
 			var  theNumberCell = $('#number-cell-'+i+'-'+j);
 			
 			if ( board[i][j] == 0)  {
-				theNumberCell.css('width', '0px');
-				theNumberCell.css('height', '0px');
-				theNumberCell.css('top', getPosTop(i, j) + 50);
-				theNumberCell.css('left', getPosLeft(i, j) + 50);
+				theNumberCell.css({
+					'width': 0,
+					'height': 0,
+					'top': getPosTop(i, j) + cellSideLength/2,
+					'left': getPosLeft(i, j) + cellSideLength/2
+				});
 			} else {
-				theNumberCell.css('width', '100px');
-				theNumberCell.css('height', '100px');
-				theNumberCell.css('top',getPosTop(i,j));
-				theNumberCell.css('left', getPosLeft(i, j));
-				theNumberCell.css('background-color', getNumberBackground( board[i][j] ));
-				theNumberCell.css('color', getNumberColor( board[i][j] ));
+				theNumberCell.css({
+					'width': cellSideLength,
+					'height': cellSideLength,
+					'top': getPosTop(i, j),
+					'left': getPosLeft(i, j),
+					'background-color': getNumberBackground(board[i][j]),
+					'color': getNumberColor(board[i][j])
+				});
 				theNumberCell.text( board[i][j] );
 			}
 			hasConficted[i][j] = false;
 		}
 	}
+	$('.number-cell').css({
+		'line-height': cellSideLength + 'PX',
+		'font-size': 0.6 * cellSideLength
+	});
 }
 
 function generateOneNumber() {
@@ -126,6 +173,7 @@ function generateOneNumber() {
 }
 
 $(document).keydown( function(event) {
+	event.preventDefault();
 	switch (event.keyCode) {
 		case 37:  //left
 			if ( moveLeft() )  {
@@ -134,7 +182,6 @@ $(document).keydown( function(event) {
 			}
 		break;
 		case 38:  //up
-		event.preventDefault();
 			if ( moveUp() )  {
 				setTimeout('generateOneNumber()', 210);
 				setTimeout('isGameover()', 300);
@@ -147,7 +194,6 @@ $(document).keydown( function(event) {
 			}
 		break;
 		case 40:  //down
-		event.preventDefault();
 			if ( moveDown() )  {
 				setTimeout('generateOneNumber()', 210);
 				setTimeout('isGameover()', 300);
@@ -156,6 +202,60 @@ $(document).keydown( function(event) {
 		default:
 		break;
 	}
+});
+
+// 触摸事件
+document.addEventListener('touchstart', function(e) {
+	var e = e || window.event;
+	startX = e.touches[0].pageX;
+	startY = e.touches[0].pageY;
+});
+
+document.addEventListener('touchend', function(e) {
+	var e = e || window.event;
+	endX = e.changedTouches[0].pageX;
+	endY = e.changedTouches[0].pageY;
+	
+	var deltaX = endX - startX;
+	var deltaY = endY - startY;
+	
+	if (Math.abs(deltaX) < 0.3 * documentWidth && Math.abs(deltaY) < 0.3 * documentWidth) 
+	return;
+	
+	if (Math.abs(deltaX) >= Math.abs(deltaY)) {
+		//X
+		if (deltaX > 0) {
+			// Right
+			if ( moveRight() )  {
+				setTimeout('generateOneNumber()', 210);
+				setTimeout('isGameover()', 300);
+			}
+		} else {
+			// Left
+			if ( moveLeft() )  {
+				setTimeout('generateOneNumber()', 210);
+				setTimeout('isGameover()', 300);
+			}
+		}	
+	} else {
+		//Y
+		if (deltaY > 0) {
+			// Down
+			if ( moveDown() )  {
+				setTimeout('generateOneNumber()', 210);
+				setTimeout('isGameover()', 300);
+			}
+		} else {
+			// Up
+			if ( moveUp() )  {
+				setTimeout('generateOneNumber()', 210);
+				setTimeout('isGameover()', 300);
+			}
+		}
+		
+	}
+	
+	
 });
 
 
